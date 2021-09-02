@@ -1,18 +1,20 @@
-import React from "react";
+import React, {useState} from "react";
 import { useForm } from "react-hook-form";
 import "./App.css";
 
 interface CardInput {
+  balanceAmt:number;
   amount:number,
   cardNumber: string;
   fullName: string;
   month: number;
   year: number;
   cvv: number;
-  transaction: number;
+  transaction: boolean;
 }
 
-function App() {
+function App(props) {
+  const [amountValue, setValue] = useState(10000);
 
   const {
     register,
@@ -20,13 +22,30 @@ function App() {
     formState: { errors }
   } = useForm<CardInput>();
 
-  const onSubmit = (data: CardInput) => {
-    alert(JSON.stringify(data));
+  const onSubmit = (props) => { // for pay and withdraw
+    if(amountValue > props.amount){
+      if(props.transaction === 'Withdraw'){
+        setValue(amountValue - Number(props.amount));
+        alert("Amount withdrawn successfully!");
+      }
+    }
+    else{
+      alert("Insufficeient funds, unable to withdraw!");
+    }
+
+    if(props.transaction === 'Pay'){
+      setValue(amountValue + Number(props.amount));
+      alert("Amount added successfully!");
+    }
+    
+    
   };
 
   return (
     <form onSubmit={handleSubmit(onSubmit)}>
       <h2>Debit Card Application</h2>
+      <label><span>Balance Amount:</span><span>{amountValue}</span></label>
+
       <label>Amount</label>
       <input 
       {...register("amount", { 
@@ -108,7 +127,7 @@ function App() {
       )}
       </div>
 
-      <input {...register("transaction", { required: true })} type="radio" value="Pay" checked={true} className="radio-block"/>
+      <input {...register("transaction", { required: true })} type="radio" value="Pay" className="radio-block"/>
       <label className="radio-block">Pay</label>
 
       <input {...register("transaction", { required: true })} type="radio" value="Withdraw" className="radio-block" />
